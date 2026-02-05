@@ -1,0 +1,8 @@
+{
+  "name": "Pandora Box",
+  "description": "A social network of ideas connecting problems with solutions through AI-driven association and business analysis on Pandora Box.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
