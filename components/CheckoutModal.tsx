@@ -36,7 +36,7 @@ const getCardType = (number: string) => {
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) => {
   const { t } = useLanguage();
   const { user } = useAuth();
-  
+
   const [method, setMethod] = useState<'CARD' | 'GPAY' | 'APPLE'>('CARD');
   const [companyName, setCompanyName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
@@ -85,13 +85,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
           supportedNetworks: ['visa', 'mastercard', 'amex'],
           merchantCapabilities: ['supports3DS'],
         },
-      }
+      },
     ];
 
     try {
       const request = new PaymentRequest(methodData, details);
       const canPay = await request.canMakePayment();
-      
+
       if (!canPay) {
         setError(t.nativePaymentUnsupported);
         return false;
@@ -102,7 +102,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
       await response.complete('success');
       return true;
     } catch (err: any) {
-      console.error("Payment Request Error:", err);
+      console.error('Payment Request Error:', err);
       if (err.name !== 'AbortError') {
         setError(t.paymentFailed);
       }
@@ -126,7 +126,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
     }
 
     if (!user) return;
-    
+
     setProcessing(true);
 
     try {
@@ -137,20 +137,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
         paymentSuccess = await handleNativePayment();
         // If native sheet failed/unsupported, use secure fallback simulation
         if (!paymentSuccess && !error) {
-           await new Promise(resolve => setTimeout(resolve, 2000));
-           paymentSuccess = true; 
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          paymentSuccess = true;
         }
       } else {
         // Secure Stripe-like card processing simulation
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        await new Promise((resolve) => setTimeout(resolve, 2500));
       }
-      
+
       if (paymentSuccess) {
         await backend.upgradeToPro(user.id, companyName, cycle);
         setSuccess(true);
       }
     } catch (err) {
-      console.error("Final Processing Error", err);
+      console.error('Final Processing Error', err);
       setError(t.paymentFailed);
     } finally {
       setProcessing(false);
@@ -162,12 +162,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
         <div className="bg-slate-900 w-full max-w-md rounded-3xl border border-slate-800 p-10 text-center space-y-6 shadow-2xl">
           <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
-             <CheckCircle2 size={48} className="text-emerald-500" />
+            <CheckCircle2 size={48} className="text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">{t.checkoutSuccessTitle}</h2>
           <p className="text-slate-400 text-sm leading-relaxed">{t.checkoutSuccessDesc}</p>
-          <button 
-            onClick={() => onClose()} 
+          <button
+            onClick={() => onClose()}
             className="w-full bg-white text-slate-950 py-4 rounded-xl font-bold hover:bg-slate-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             {t.goToDashboard}
@@ -190,13 +190,18 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
 
           <form onSubmit={handlePay} className="space-y-6">
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">{t.company}</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                {t.company}
+              </label>
               <div className="relative">
-                <input 
+                <input
                   ref={companyInputRef}
-                  type="text" 
+                  type="text"
                   value={companyName}
-                  onChange={e => { setCompanyName(e.target.value); if(error) setError(null); }}
+                  onChange={(e) => {
+                    setCompanyName(e.target.value);
+                    if (error) setError(null);
+                  }}
                   placeholder={t.innovationCorpPlaceholder}
                   className={`w-full bg-slate-800 border rounded-xl px-4 py-3 text-white focus:outline-none transition-all ${error && !companyName ? 'border-rose-500 bg-rose-500/5' : 'border-slate-700 focus:border-purple-500'}`}
                 />
@@ -239,33 +244,52 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
                       <div className="absolute left-3 top-2.5 text-slate-600 flex items-center gap-1">
                         <CreditCard size={16} />
                         {cardNumber.length > 4 && (
-                          <span className="text-[8px] font-bold bg-slate-700 px-1 rounded text-slate-300">{getCardType(cardNumber)}</span>
+                          <span className="text-[8px] font-bold bg-slate-700 px-1 rounded text-slate-300">
+                            {getCardType(cardNumber)}
+                          </span>
                         )}
                       </div>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={cardNumber}
-                        onChange={e => setCardNumber(e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim())}
-                        placeholder="**** **** **** 4242" 
-                        className={`w-full bg-slate-800 border rounded-xl py-2.5 pl-20 pr-4 text-sm text-white focus:outline-none transition-all ${error === t.invalidCard ? 'border-rose-500 bg-rose-500/5' : 'border-slate-700 focus:border-purple-500'}`} 
+                        onChange={(e) =>
+                          setCardNumber(
+                            e.target.value
+                              .replace(/\s/g, '')
+                              .replace(/(\d{4})/g, '$1 ')
+                              .trim()
+                          )
+                        }
+                        placeholder="**** **** **** 4242"
+                        className={`w-full bg-slate-800 border rounded-xl py-2.5 pl-20 pr-4 text-sm text-white focus:outline-none transition-all ${error === t.invalidCard ? 'border-rose-500 bg-rose-500/5' : 'border-slate-700 focus:border-purple-500'}`}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">{t.expiry}</label>
-                      <input type="text" placeholder="12/28" className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-purple-500" />
+                      <input
+                        type="text"
+                        placeholder="12/28"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-purple-500"
+                      />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">{t.cvc}</label>
-                      <input type="text" placeholder="***" className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-purple-500" />
+                      <input
+                        type="text"
+                        placeholder="***"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-purple-500"
+                      />
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-2xl flex flex-col items-center justify-center text-center animate-fade-in h-full relative overflow-hidden">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 shadow-lg ${method === 'GPAY' ? 'bg-[#4285F4]/20 text-[#4285F4]' : 'bg-white/20 text-white'}`}>
-                     {method === 'GPAY' ? <Chrome size={24} /> : <Apple size={24} />}
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 shadow-lg ${method === 'GPAY' ? 'bg-[#4285F4]/20 text-[#4285F4]' : 'bg-white/20 text-white'}`}
+                  >
+                    {method === 'GPAY' ? <Chrome size={24} /> : <Apple size={24} />}
                   </div>
                   <p className="text-xs text-slate-400 font-medium">
                     {method === 'GPAY' ? 'Google Pay' : 'Apple Pay'} {t.authenticating.toLowerCase()}
@@ -288,11 +312,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onClose, cycle }) 
             )}
 
             <div className="bg-slate-800/50 p-4 rounded-2xl flex justify-between items-center border border-slate-800">
-               <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Total</span>
-               <div className="flex items-center gap-2">
-                 <span className="text-xl font-bold text-white">${priceValue}</span>
-                 <span className="text-[10px] text-slate-500 uppercase font-bold">/ {cycle.toLowerCase()}</span>
-               </div>
+              <span className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Total</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-white">${priceValue}</span>
+                <span className="text-[10px] text-slate-500 uppercase font-bold">/ {cycle.toLowerCase()}</span>
+              </div>
             </div>
 
             <button

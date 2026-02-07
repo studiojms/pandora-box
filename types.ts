@@ -1,7 +1,6 @@
-
 export enum IdeaType {
   PROBLEM = 'PROBLEM',
-  SOLUTION = 'SOLUTION'
+  SOLUTION = 'SOLUTION',
 }
 
 export type Language = 'en' | 'pt' | 'es';
@@ -17,13 +16,13 @@ export enum InteractionType {
   ECHO = 'ECHO',
   COMMENT = 'COMMENT',
   FAVORITE = 'FAVORITE',
-  CONTRIBUTOR_ADDED = 'CONTRIBUTOR_ADDED'
+  CONTRIBUTOR_ADDED = 'CONTRIBUTOR_ADDED',
 }
 
 export enum UserRole {
   INDIVIDUAL = 'INDIVIDUAL',
   COMPANY_ADMIN = 'COMPANY_ADMIN',
-  COMPANY_MEMBER = 'COMPANY_MEMBER'
+  COMPANY_MEMBER = 'COMPANY_MEMBER',
 }
 
 export interface IdeaMedia {
@@ -38,7 +37,7 @@ export interface Idea {
   description: string;
   author: string;
   authorId: string;
-  votes: number; 
+  votes: number;
   views: number;
   tags: string[];
   status: IdeaStatus;
@@ -71,14 +70,14 @@ export interface BusinessAnalysis {
     revenueStreams: string;
     costStructure: string;
   };
-  competitors: string[]; 
+  competitors: string[];
   suggestedTeam: string[];
 }
 
-export type ViewState = 
-  | { type: 'FEED' } 
-  | { type: 'IDEA_DETAIL', ideaId: string } 
-  | { type: 'PROFILE', username: string } 
+export type ViewState =
+  | { type: 'FEED' }
+  | { type: 'IDEA_DETAIL'; ideaId: string }
+  | { type: 'PROFILE'; username: string }
   | { type: 'FAVORITES' }
   | { type: 'PRO_PLAN' }
   | { type: 'COMPANY_DASHBOARD' };

@@ -1,13 +1,13 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signInWithPopup, 
-  signOut, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
   onAuthStateChanged,
-  updateProfile 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  updateProfile,
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { onSnapshot, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 import { User } from '../types';
 import { auth, googleProvider, db } from '../services/firebase';
 import { backend } from '../services/backend';
@@ -46,12 +46,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           id: firebaseUser.uid,
           name: firebaseUser.displayName || 'Anonymous',
           email: firebaseUser.email || '',
-          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`
+          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
         };
         await backend.syncUserProfile(initialUserData);
 
         // Listen for real-time profile updates
-        unsubscribeProfile = onSnapshot(doc(db, "users", firebaseUser.uid), (doc) => {
+        unsubscribeProfile = onSnapshot(doc(db, 'users', firebaseUser.uid), (doc) => {
           if (doc.exists()) {
             setUser({ id: doc.id, ...doc.data() } as User);
           }
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: firebaseUser.uid,
       name,
       email,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
     };
     await backend.syncUserProfile(userData);
     setIsAuthModalOpen(false);
@@ -97,17 +97,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      signup, 
-      socialLogin, 
-      logout,
-      isAuthModalOpen,
-      openAuthModal: () => setIsAuthModalOpen(true),
-      closeAuthModal: () => setIsAuthModalOpen(false)
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        signup,
+        socialLogin,
+        logout,
+        isAuthModalOpen,
+        openAuthModal: () => setIsAuthModalOpen(true),
+        closeAuthModal: () => setIsAuthModalOpen(false),
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

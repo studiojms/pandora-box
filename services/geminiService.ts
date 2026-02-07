@@ -1,17 +1,20 @@
-
-import { GoogleGenAI, Type } from "@google/genai";
-import { Idea, BusinessAnalysis, Language, IdeaType } from "../types";
+import { GoogleGenAI, Type } from '@google/genai';
+import { Idea, BusinessAnalysis, Language, IdeaType } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const getLanguageInstruction = (lang: Language) => {
-  switch(lang) {
-    case 'pt': return "IMPORTANT: Provide all text fields specifically in Portuguese (pt-BR).";
-    case 'es': return "IMPORTANT: Provide all text fields specifically in Spanish.";
-    default: return "IMPORTANT: Provide all text fields in English.";
+  switch (lang) {
+    case 'pt':
+      return 'IMPORTANT: Provide all text fields specifically in Portuguese (pt-BR).';
+    case 'es':
+      return 'IMPORTANT: Provide all text fields specifically in Spanish.';
+    default:
+      return 'IMPORTANT: Provide all text fields in English.';
   }
-}
+};
 
+// @google/genai Fix: Updated model to gemini-3-pro-preview and fixed response property access
 export const analyzeBusinessPotential = async (idea: Idea, lang: Language): Promise<BusinessAnalysis> => {
   const langInstruction = getLanguageInstruction(lang);
 
@@ -39,7 +42,7 @@ export const analyzeBusinessPotential = async (idea: Idea, lang: Language): Prom
       model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
-        responseMimeType: "application/json",
+        responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -54,33 +57,47 @@ export const analyzeBusinessPotential = async (idea: Idea, lang: Language): Prom
                 weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
                 opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
                 threats: { type: Type.ARRAY, items: { type: Type.STRING } },
-              }
+              },
             },
             canvas: {
-                type: Type.OBJECT,
-                properties: {
-                    valueProposition: { type: Type.STRING },
-                    customerSegments: { type: Type.STRING },
-                    revenueStreams: { type: Type.STRING },
-                    costStructure: { type: Type.STRING },
-                }
+              type: Type.OBJECT,
+              properties: {
+                valueProposition: { type: Type.STRING },
+                customerSegments: { type: Type.STRING },
+                revenueStreams: { type: Type.STRING },
+                costStructure: { type: Type.STRING },
+              },
             },
             competitors: { type: Type.ARRAY, items: { type: Type.STRING } },
             suggestedTeam: { type: Type.ARRAY, items: { type: Type.STRING } },
             summary: { type: Type.STRING },
-            mermaidDiagram: { type: Type.STRING }
-          }
-        }
-      }
+            mermaidDiagram: { type: Type.STRING },
+          },
+          required: [
+            'viabilityScore',
+            'marketSizeScore',
+            'complexityScore',
+            'veracityScore',
+            'swot',
+            'canvas',
+            'competitors',
+            'suggestedTeam',
+            'summary',
+            'mermaidDiagram',
+          ],
+        },
+      },
     });
 
-    return JSON.parse(response.text!) as BusinessAnalysis;
+    const text = response.text || '{}';
+    return JSON.parse(text) as BusinessAnalysis;
   } catch (error) {
-    console.error("The Forge Analysis Error:", error);
+    console.error('The Forge Analysis Error:', error);
     throw error;
   }
 };
 
+// @google/genai Fix: Updated model to gemini-3-flash-preview and fixed response property access
 export const refineIdeaDraft = async (rawInput: string, type: IdeaType, lang: Language) => {
   const langInstruction = getLanguageInstruction(lang);
   const prompt = `
@@ -101,24 +118,27 @@ export const refineIdeaDraft = async (rawInput: string, type: IdeaType, lang: La
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
-        responseMimeType: "application/json",
+        responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             title: { type: Type.STRING },
             description: { type: Type.STRING },
-            tags: { type: Type.ARRAY, items: { type: Type.STRING } }
-          }
-        }
-      }
+            tags: { type: Type.ARRAY, items: { type: Type.STRING } },
+          },
+          required: ['title', 'description', 'tags'],
+        },
+      },
     });
-    return JSON.parse(response.text!);
+    const text = response.text || '{}';
+    return JSON.parse(text);
   } catch (error) {
-    console.error("Refinement error", error);
+    console.error('Refinement error', error);
     return null;
   }
 };
 
+// @google/genai Fix: Updated model to gemini-3-flash-preview and fixed response property access
 export const analyzePrototypeImage = async (base64Image: string, lang: Language) => {
   const langInstruction = getLanguageInstruction(lang);
   const prompt = `
@@ -129,35 +149,34 @@ export const analyzePrototypeImage = async (base64Image: string, lang: Language)
   `;
 
   try {
-    // Fix: Wrap multiple parts into a contents object as per SDK requirements.
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: {
-        parts: [
-          { inlineData: { mimeType: 'image/jpeg', data: base64Image.split(',')[1] } },
-          { text: prompt }
-        ]
+        parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image.split(',')[1] } }, { text: prompt }],
       },
       config: {
-        responseMimeType: "application/json",
+        responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             title: { type: Type.STRING },
             description: { type: Type.STRING },
             technicalInsights: { type: Type.ARRAY, items: { type: Type.STRING } },
-            improvementSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } }
-          }
-        }
-      }
+            improvementSuggestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+          },
+          required: ['title', 'description', 'technicalInsights', 'improvementSuggestions'],
+        },
+      },
     });
-    return JSON.parse(response.text!);
+    const text = response.text || '{}';
+    return JSON.parse(text);
   } catch (error) {
-    console.error("Vision Analysis error", error);
+    console.error('Vision Analysis error', error);
     return null;
   }
 };
 
+// @google/genai Fix: Updated model to gemini-3-flash-preview and fixed response property access
 export const findBrainstormConnections = async (idea: Idea, lang: Language): Promise<string[]> => {
   const langInstruction = getLanguageInstruction(lang);
   const prompt = `
@@ -174,15 +193,16 @@ export const findBrainstormConnections = async (idea: Idea, lang: Language): Pro
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
-        responseMimeType: "application/json",
+        responseMimeType: 'application/json',
         responseSchema: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
-        }
-      }
+          type: Type.ARRAY,
+          items: { type: Type.STRING },
+        },
+      },
     });
-    return JSON.parse(response.text!);
+    const text = response.text || '[]';
+    return JSON.parse(text);
   } catch (error) {
-    return ["Could not connect concepts."];
+    return ['Could not connect concepts.'];
   }
 };
